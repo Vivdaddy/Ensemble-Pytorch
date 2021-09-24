@@ -3,7 +3,7 @@
 
 import torch
 import torch.nn.functional as F
-
+import numpy as np
 
 __all__ = [
     "average",
@@ -27,10 +27,10 @@ def averaged_std(outputs):
     Step 2: Average Across all datapoints
     Step 3: Average Across all item
     """
-    outputs = torch.Tensor(outputs)
-    step1 = torch.std(outputs, dim=0)
-    step2 = torch.mean(step1, dim=0)
-    step3 = torch.mean(step2, dim=0)
+    outputs = np.array(outputs)
+    step1 = np.std(outputs, axis=0)
+    step2 = np.mean(step1, axis=0)
+    step3 = np.mean(step2, axis=0)
     return step3.tolist()[0]
 
 
