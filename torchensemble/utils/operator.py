@@ -27,10 +27,11 @@ def averaged_std(outputs):
     Step 2: Average Across all datapoints
     Step 3: Average Across all item
     """
+    outputs = torch.Tensor(outputs)
     step1 = torch.std(outputs, dim=0)
     step2 = torch.mean(step1, dim=0)
     step3 = torch.mean(step2, dim=0)
-    return step3
+    return step3.tolist()[0]
 
 
 def sum_with_multiplicative(outputs, factor):
