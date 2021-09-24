@@ -33,7 +33,7 @@ def averaged_std(outputs):
     step2 = torch.mean(step1, dim=0)
     step3 = torch.mean(step2, dim=0)
     print("step 3 is ", step3)
-    return step3.tolist()[0]
+    return step3.tolist()
 
 
 def sum_with_multiplicative(outputs, factor):
