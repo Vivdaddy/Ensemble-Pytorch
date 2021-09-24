@@ -36,7 +36,7 @@ Latest version (under development):
 
 .. code:: bash
 
-    pip install git+https://github.com/TorchEnsemble-Community/Ensemble-Pytorch.git
+    pip install git+https://github.com/Vivdaddy/Ensemble-Pytorch.git
 
 Example
 -------
