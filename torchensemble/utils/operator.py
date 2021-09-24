@@ -28,6 +28,7 @@ def averaged_std(outputs):
     """
     print("Outputs ", outputs)
     outputs = torch.stack(outputs)
+    print("Stacked outputs ", outputs)
     step1 = torch.std(outputs, dim=0)
     step2 = torch.mean(step1, dim=0)
     step3 = torch.mean(step2, dim=0)
