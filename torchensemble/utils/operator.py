@@ -27,7 +27,7 @@ def averaged_std(outputs):
     Step 3: Average Across all item
     """
     print("Outputs ", outputs)
-    outputs = torch.Tensor(outputs)
+    outputs = torch.stack(outputs)
     step1 = torch.std(outputs, dim=0)
     step2 = torch.mean(step1, dim=0)
     step3 = torch.mean(step2, dim=0)
