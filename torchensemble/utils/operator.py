@@ -7,6 +7,7 @@ import torch.nn.functional as F
 
 __all__ = [
     "average",
+    "averaged_std"
     "sum_with_multiplicative",
     "onehot_encoding",
     "pseudo_residual_classification",
@@ -17,6 +18,19 @@ __all__ = [
 def average(outputs):
     """Compute the average over a list of tensors with the same size."""
     return sum(outputs) / len(outputs)
+
+
+def averaged_std(outputs):
+    """
+    Computes averaged standard deviation across list of tensors with the similar size
+    Step 1: Std across members of ensemble
+    Step 2: Average Across all datapoints
+    Step 3: Average Across all item
+    """
+    step1 = torch.std(outputs, dim=0)
+    step2 = torch.mean(step1, dim=0)
+    step3 = torch.mean(step2, dim=0)
+    return step3
 
 
 def sum_with_multiplicative(outputs, factor):

@@ -168,8 +168,8 @@ class VotingClassifier(BaseClassifier):
                 F.softmax(estimator(*x), dim=1) for estimator in estimators
             ]
             proba = op.average(outputs)
-
-            return proba
+            std = op.averaged_std(outputs)
+            return proba, std
 
         # Maintain a pool of workers
         with Parallel(n_jobs=self.n_jobs) as parallel:
@@ -220,7 +220,7 @@ class VotingClassifier(BaseClassifier):
                             data, target = io.split_data_target(
                                 elem, self.device
                             )
-                            output = _forward(estimators, *data)
+                            output, std = _forward(estimators, *data)
                             _, predicted = torch.max(output.data, 1)
                             correct += (predicted == target).sum().item()
                             total += target.size(0)
@@ -235,9 +235,9 @@ class VotingClassifier(BaseClassifier):
 
                         msg = (
                             "Epoch: {:03d} | Validation Acc: {:.3f}"
-                            " % | Historical Best: {:.3f} %"
+                            " % | Historical Best: {:.3f} | Uncertainty {:.5f} %"
                         )
-                        self.logger.info(msg.format(epoch, acc, best_acc))
+                        self.logger.info(msg.format(epoch, acc, best_acc, std))
                         if self.tb_logger:
                             self.tb_logger.add_scalar(
                                 "voting/Validation_Acc", acc, epoch
@@ -346,7 +346,6 @@ class VotingRegressor(BaseRegressor):
         def _forward(estimators, *x):
             outputs = [estimator(*x) for estimator in estimators]
             pred = op.average(outputs)
-
             return pred
 
         # Maintain a pool of workers
@@ -397,7 +396,7 @@ class VotingRegressor(BaseRegressor):
                             data, target = io.split_data_target(
                                 elem, self.device
                             )
-                            output = _forward(estimators, *data)
+                            output, std = _forward(estimators, *data)
                             val_loss += self._criterion(output, target)
                         val_loss /= len(test_loader)
 
@@ -410,7 +409,7 @@ class VotingRegressor(BaseRegressor):
 
                         msg = (
                             "Epoch: {:03d} | Validation Loss:"
-                            " {:.5f} | Historical Best: {:.5f}"
+                            " {:.5f} | Historical Best: {:.5f} "
                         )
                         self.logger.info(
                             msg.format(epoch, val_loss, best_loss)
