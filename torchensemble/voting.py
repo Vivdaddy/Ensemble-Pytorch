@@ -137,7 +137,8 @@ class VotingClassifier(BaseClassifier):
         uncertainties = []
         losses = []
         loss_function = nn.CrossEntropyLoss()
-        running_loss = 0
+        running_loss1 = 0
+        running_loss2 = 0
         self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader)
 
@@ -226,7 +227,8 @@ class VotingClassifier(BaseClassifier):
                             )
                             output, std = _forward(estimators, *data)
                             loss = loss_function(output, target)
-                            running_loss += loss.item()
+                            running_loss1 = running_loss2
+                            running_loss2 += loss.item()
                             _, predicted = torch.max(output.data, 1)
                             correct += (predicted == target).sum().item()
                             total += target.size(0)
@@ -250,7 +252,7 @@ class VotingClassifier(BaseClassifier):
                             )
                         accuracies.append(acc)
                         uncertainties.append(std)
-                        losses.append(running_loss)
+                        losses.append(running_loss2 - running_loss1)
 
                 # Update the scheduler
                 with warnings.catch_warnings():
