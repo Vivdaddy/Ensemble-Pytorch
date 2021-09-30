@@ -133,7 +133,11 @@ class VotingClassifier(BaseClassifier):
         save_model=True,
         save_dir=None,
     ):
-
+        accuracies = []
+        uncertainties = []
+        losses = []
+        loss_function = nn.CrossEntropyLoss()
+        running_loss = 0
         self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader)
 
@@ -221,6 +225,8 @@ class VotingClassifier(BaseClassifier):
                                 elem, self.device
                             )
                             output, std = _forward(estimators, *data)
+                            loss = loss_function(output, target)
+                            running_loss += loss.item()
                             _, predicted = torch.max(output.data, 1)
                             correct += (predicted == target).sum().item()
                             total += target.size(0)
@@ -242,6 +248,9 @@ class VotingClassifier(BaseClassifier):
                             self.tb_logger.add_scalar(
                                 "voting/Validation_Acc", acc, epoch
                             )
+                        accuracies.append(acc)
+                        uncertainties.append(std)
+                        losses.append(running_loss)
 
                 # Update the scheduler
                 with warnings.catch_warnings():
@@ -257,6 +266,7 @@ class VotingClassifier(BaseClassifier):
         self.estimators_.extend(estimators)
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
+        return (accuracies, uncertainties, losses)
 
     @torchensemble_model_doc(item="classifier_evaluate")
     def evaluate(self, test_loader, return_loss=False):
